@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  name                 String
+  phone                String                @unique
+  email                String?               @unique
+  password             String?
+  createdAt            DateTime              @default(now())
+  transactions         Transaction[]
+  categories           Category[]
+  goals                Goal[]
+  conversation         Conversation?
+  recurringTransactions RecurringTransaction[]
+}
+
+model Category {
+  id                    String                 @id @default(cuid())
+  name                  String
+  type                  CategoryType
+  emoji                 String                 @default("💰")
+  color                 String                 @default("#6366f1")
+  isDefault             Boolean                @default(false)
+  userId                String
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions          Transaction[]
+  recurringTransactions RecurringTransaction[]
+  createdAt             DateTime               @default(now())
+}
+
+model Transaction {
+  id                    String               @id @default(cuid())
+  userId                String
+  user                  User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId            String?
+  category              Category?            @relation(fields: [categoryId], references: [id])
+  recurringTransactionId String?
+  recurringTransaction  RecurringTransaction? @relation(fields: [recurringTransactionId], references: [id])
+  type                  TransactionType
+  amount                Decimal
+  description           String
+  date                  DateTime             @default(now())
+  source                Source               @default(WEB)
+  createdAt             DateTime             @default(now())
+}
+
+model RecurringTransaction {
+  id           String          @id @default(cuid())
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId   String?
+  category     Category?       @relation(fields: [categoryId], references: [id])
+  type         TransactionType
+  amount       Decimal
+  description  String
+  frequency    Frequency
+  startDate    DateTime
+  endDate      DateTime?
+  nextDue      DateTime
+  active       Boolean         @default(true)
+  transactions Transaction[]
+  createdAt    DateTime        @default(now())
+}
+
+model Goal {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  targetAmount  Decimal
+  currentAmount Decimal   @default(0)
+  deadline      DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  state     String   @default("idle")
+  context   String?
+  updatedAt DateTime @updatedAt
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum Source {
+  WEB
+  WHATSAPP
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}

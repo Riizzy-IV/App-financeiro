@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone *)",
+      "Bash(npx tsx *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"const z = require\\('./node_modules/zustand/middleware'\\); console.log\\(typeof z.persist\\)\")"
+    ]
+  }
+}
