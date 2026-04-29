@@ -99,6 +99,11 @@ export default function Transactions() {
   const sortedTxs = [...transactions].sort((a, b) => dayjs(b.date).diff(dayjs(a.date)))
   const activeRecurring = recurring.filter(r => r.active)
 
+  const recurringTotal = activeRecurring.reduce(
+    (acc, r) => acc + (r.type === 'EXPENSE' ? -1 : 1) * Number(r.amount),
+    0,
+  )
+
   return (
     <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
@@ -114,8 +119,11 @@ export default function Transactions() {
           <div className="flex items-center gap-2 mb-4">
             <RefreshCw size={16} className="text-green-600" />
             <h2 className="font-semibold text-gray-800">Recorrentes ativos</h2>
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full ml-auto">
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
               {activeRecurring.length}
+            </span>
+            <span className={`ml-auto font-semibold text-sm ${recurringTotal >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+              Total mensal: {recurringTotal >= 0 ? '+' : ''} R$ {recurringTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
             </span>
           </div>
           <div className="divide-y divide-gray-50">
